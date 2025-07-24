@@ -7,8 +7,6 @@ A = r1cs.A
 B = r1cs.B
 
 # WITNESSES
-wG1 = [multiply(G1, i) for i in witness.w]
-wG2 = [multiply(G2, i) for i in witness.w]
 allG2 = [G2 for _ in witness.w]
 
 # HELPER: DOT PRODUCT ON ELIPTIC CURVES
@@ -18,9 +16,9 @@ def dot_ec(constraints, witness, G):
         sum = None
         for idx, element in enumerate(constraint):
             if element < 0:
-                sum = add(sum, multiply(witness[idx], curve_order + element))
+                sum = add(sum, multiply(multiply(G, witness[idx]), curve_order + element))
             else:
-                sum = add(sum, multiply(witness[idx], element))
+                sum = add(sum, multiply(multiply(G, witness[idx]), element))
         r.append(sum)
     return r
 
@@ -32,6 +30,6 @@ def elmul_ec(A, B):
     return out
 
 # CHECK CONSTRAINTS
-lhs = elmul_ec(dot_ec(OUT, wG1, G1), allG2)
-rhs = elmul_ec(dot_ec(A, wG1, G1), dot_ec(B, wG2, G2))
+lhs = elmul_ec(dot_ec(OUT, witness.w, G1), allG2)
+rhs = elmul_ec(dot_ec(A, witness.w, G1), dot_ec(B, witness.w, G2))
 print(eq(lhs, rhs))
